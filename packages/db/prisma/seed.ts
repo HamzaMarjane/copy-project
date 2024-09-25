@@ -74,6 +74,8 @@ const popularEventTags = [
   "Travel & Outdoor",
   "Other"
 ];
+
+
 const NUM_USERS = 100;
 const NUM_COMMUNITIES = 30;
 const NUM_EVENTS = 200;
@@ -192,7 +194,9 @@ async function main() {
           tags: {
             connect: faker.helpers.arrayElements(popularEventTags, { min: 1, max: 3 }).map(tag => ({ name: tag })),
           },
-          ticketAmount: faker.number.int({ min: 10, max: 1000 }),
+          ticketSold: faker.number.int({ min: 10, max: 100 }),
+
+          ticketAmount: faker.number.int({ min: 100, max: 500 }),
           TicketPrice: eventType === EventType.PAID ? parseFloat(faker.finance.amount({ min: 5, max: 500, dec: 2 })) : 0,
           image: faker.image.avatar(),
           type: eventType,

@@ -11,6 +11,7 @@ import { prisma } from "@ntla9aw/db";
 import { v4 as uuid } from "uuid";
 import { AuthProviderType } from "@ntla9aw/db/types";
 import { sign } from "jsonwebtoken";
+import { getUserRoles } from "../utils";
 export const authRoutes = router({
   users: privateProcedure("admin").query(({ }) => {
     return prisma.user.findMany();
@@ -110,5 +111,8 @@ export const authRoutes = router({
       const token = sign({uid:user.uid}, process.env.NEXTAUTH_SECRET || '')
       return {user,token}
     }),
-  
+  roles : privateProcedure().query(async ({ctx})=>{
+    const {uid} = ctx
+    return await getUserRoles(uid)
+  })
 });

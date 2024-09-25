@@ -9,6 +9,7 @@ import { trpcClient } from "@ntla9aw/trpc-client/src/client";
 import { PlusOutlined } from "@ant-design/icons";
 import type { UploadFile, UploadProps } from "antd";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 
 const { Title } = Typography;
 
@@ -29,6 +30,7 @@ const CommunityForm = ({ title }: { title: string }) => {
     formState: { errors },
   } = userFormCommunity();
   const { mutateAsync } = trpcClient.community.create.useMutation();
+  const router = useRouter()
 
   const { data: userData } = useSession();
   const [previewImage, setPreviewImage] = useState("");
@@ -82,6 +84,7 @@ const CommunityForm = ({ title }: { title: string }) => {
           } catch (error) {
             console.error("Error creating community:", error);
           }
+          router.push('/')
         })}
         autoComplete="off"
       >

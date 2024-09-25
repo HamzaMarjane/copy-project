@@ -1,27 +1,21 @@
-import React, {  useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { DeleteOutlined, EditOutlined, SearchOutlined } from "@ant-design/icons";
-import type { InputRef, TableColumnsType } from "antd";
+import type { InputRef, TableColumnsType, TablePaginationConfig } from "antd";
 import { Button, Input, Popconfirm, Space, Table } from "antd";
 import type { FilterDropdownProps } from "antd/es/table/interface";
 import Highlighter from "react-highlight-words";
+import { Event, City } from "../../utils/types";
 
-interface DataType {
-  key: string;
-  name: string;
-  age: number;
-  address: string;
-}
-
-type DataIndex = keyof DataType;
+type DataIndex = keyof Event;
 
 interface EventTableProps {
-  columns: TableColumnsType<DataType>;
-  data: DataType[];
-  onUpdate: (record: DataType) => void;  // New handler for update action
-  onDelete: (key: string) => void;   
+  data: (Event & { city: City })[];
+  onUpdate: (event: Event) => void;
+  onDelete: (event_id: string) => void;
+  pagination: TablePaginationConfig;
 }
 
-const EventTable: React.FC<EventTableProps> = ({ columns, data,onUpdate, onDelete }) => {
+const EventTable: React.FC<EventTableProps> = ({ data, onUpdate, onDelete, pagination }) => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef<InputRef>(null);
@@ -86,12 +80,17 @@ const EventTable: React.FC<EventTableProps> = ({ columns, data,onUpdate, onDelet
     filterIcon: (filtered: boolean) => (
       <SearchOutlined style={{ color: filtered ? "#1677ff" : undefined }} />
     ),
-    onFilter: (value:unknown, record:DataType) =>
-      record[dataIndex]
-        .toString()
+    onFilter: (value: unknown, record: Event & { city: City }) => {
+      const filterValue = value as string;
+      if (dataIndex === 'city_id') {
+        return record.city.name.toLowerCase().includes(filterValue.toLowerCase());
+      }
+      return record[dataIndex]
+        ?.toString()
         .toLowerCase()
-        .includes((value as string).toLowerCase()),
-    render: (text:string) =>
+        .includes(filterValue.toLowerCase()) || false;
+    },
+    render: (text: string) =>
       searchedColumn === dataIndex ? (
         <Highlighter
           highlightStyle={{ backgroundColor: "#ffc069", padding: 0 }}
@@ -103,38 +102,68 @@ const EventTable: React.FC<EventTableProps> = ({ columns, data,onUpdate, onDelet
         text
       ),
   });
-  const actionColumn = {
-    title: "Actions",
-    key: "actions",
-    render: ( record: DataType) => (
-      <Space size="middle">
-        <Button  type="primary" onClick={() => onUpdate(record)}>
-        <EditOutlined />
-        </Button>
-        <Popconfirm
-          title="Are you sure to delete this item?"
-          onConfirm={() => onDelete(record.key)}
-          okText="Yes"
-          cancelText="No"
-        >
-          <Button type="primary" danger>
-          <DeleteOutlined />
-          </Button>
-        </Popconfirm>
-      </Space>
-    ),
-  };
-  // Dynamically apply search props to columns
-  const enhancedColumns = [...columns.map((col) => ({
-    ...col,
-    ...getColumnSearchProps(col.key as DataIndex),
-  })), actionColumn]; // Append the action column to the columns
 
+  const columns: TableColumnsType<Event & { city: City }> = [
+    {
+      title: "Title",
+      dataIndex: "title",
+      key: "title",
+      ...getColumnSearchProps("title"),
+    },
+    {
+      title: "Description",
+      dataIndex: "description",
+      key: "description",
+      ...getColumnSearchProps("description"),
+    },
+    {
+      title: "Date",
+      dataIndex: "date",
+      key: "date",
+      render: (text: Date) => text.toLocaleString(),
+    },
+    {
+      title: "City",
+      dataIndex: "city_id",
+      key: "city_id",
+      ...getColumnSearchProps("city_id"),
+      render: (_, record) => record.city.name,
+    },
+    {
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
+      ...getColumnSearchProps("type"),
+    },
+    {
+      title: "Actions",
+      key: "actions",
+      render: (_, record) => (
+        <Space size="middle">
+          <Button type="primary" onClick={() => onUpdate(record)}>
+            <EditOutlined />
+          </Button>
+          <Popconfirm
+            title="Are you sure to delete this event?"
+            onConfirm={() => onDelete(record.event_id)}
+            okText="Yes"
+            cancelText="No"
+          >
+            <Button type="primary" danger>
+              <DeleteOutlined />
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
 
   return (
-    <Table
-      columns={enhancedColumns}
-      dataSource={data}
+    <Table 
+      columns={columns} 
+      dataSource={data} 
+      rowKey="event_id" 
+      pagination={pagination}
     />
   );
 };

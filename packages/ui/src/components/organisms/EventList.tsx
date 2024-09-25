@@ -1,14 +1,14 @@
 "use client";
 import { Col } from "antd";
 import { ElementType } from "react";
-import { Event } from "../../utils/types";
+import { EventExtra } from "../../utils/types";
 
 interface PreviewListProps {
   Card: ElementType;
-  data: Event[] | undefined;
+  data: EventExtra[] | undefined;
   lastEventElementRef: (node: HTMLDivElement | null) => void;
-  onEventSelect: (event: Event) => void;
-  selectedEvent: Event | null;
+  onEventSelect: (event: EventExtra) => void;
+  selectedEvent: EventExtra | null;
 }
 
 function EventList({ Card, data, lastEventElementRef, onEventSelect, selectedEvent }: PreviewListProps) {

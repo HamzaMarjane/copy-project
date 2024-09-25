@@ -1,17 +1,17 @@
 import React from "react";
 import { List, Typography } from "antd";
-import { Event } from "../../utils/types";
+import { EventExtra } from "../../utils/types";
 
 const { Title, Text } = Typography;
 
 interface EventInfoProps {
   title: string; // Title of the event
-  data: Event | undefined; // Data should be an object with key-value pairs
+  data: EventExtra | undefined; // Data should be an object with key-value pairs
 }
 
 const EventInfo: React.FC<EventInfoProps> = ({ title, data }) => {
   // Define the keys you want to display
-  const eventKeys: (keyof Event)[] = [
+  const eventKeys: (keyof EventExtra)[] = [
     'title',
     'description',
     'date',

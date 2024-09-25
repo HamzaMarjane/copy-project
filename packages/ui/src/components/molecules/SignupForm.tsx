@@ -88,7 +88,7 @@ const router = useRouter(); // Initialize useRouter
             await signIn("credentials", {
               email: data.email,
               password: data.password,
-              callbackUrl: "/",
+              callbackUrl: "/auth/subscription",
             });
           }
         router.push('/auth/subscription');

@@ -2,8 +2,17 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "outDir": "dist",
+    "rootDir": "../../",
     "esModuleInterop": true,
-    "types": ["node"]
+    "types": ["jest", "node"],
+    "target": "es2017",
+    "module": "CommonJS",
+    "typeRoots": ["../../node_modules/@types", "node_modules/@types"],
+"strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "sourceMap": true
   },
+  "include": ["src/**/*"],
   "exclude": ["node_modules", "dist"]
 }

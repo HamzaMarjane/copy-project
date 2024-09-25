@@ -3,21 +3,22 @@ import { Role } from "./types";
 import { TRPCError } from "@trpc/server";
 import Stripe from "stripe";
 
-export const getUserRoles = async (uid: string): Promise<Role[]> => {
+export const getUserRoles = async (uid: string | undefined): Promise<Role[]> => {
   try {
-    const [adminExists, memberExists, individualExists, organizationExists] =
+    if(typeof uid === undefined) throw new Error
+    const [adminExists,organizationExists,individualExists, memberExists] =
       await Promise.all([
         prisma.admin.findUnique({ where: { uid } }),
-        prisma.member.findUnique({ where: { uid } }),
-        prisma.individual.findUnique({ where: { uid } }),
         prisma.organization.findUnique({ where: { uid } }),
+        prisma.individual.findUnique({ where: { uid } }),
+        prisma.member.findUnique({ where: { uid } }),
       ]);
 
     const roles: Role[] = [];
     if (adminExists) roles.push("admin");
-    if (memberExists) roles.push("member");
-    if (individualExists) roles.push("individual");
     if (organizationExists) roles.push("organization");
+    if (individualExists) roles.push("individual");
+    if (memberExists) roles.push("member");
 
     return roles;
   } catch (error) {
@@ -86,8 +87,8 @@ export const createCheckoutSession = async (priceId: string, uid: string) => {
       },
     ],
     mode: 'subscription',
-    success_url: `http://localhost:3000/dashboard`,
-    cancel_url: `http://localhost:3000/auth/subscription`,
+    success_url: `http://localhost:3000/auth/community`,
+    cancel_url: `http://localhost:3000/auth/subscription?cancel=true`,
     metadata: {
       uid, // Store user ID for later use
     },

@@ -1,7 +1,8 @@
 "use client";
-import { Space, DatePicker, Select, Tag, Input } from "antd";
+import { Space, DatePicker, Select } from "antd";
 import dayjs from 'dayjs';
-import { ReactElement, useState } from "react";
+import TagSelector from '../atoms/TagSelector';  // Import the new TagSelector component
+import { Tag } from "../../utils/types";
 
 const { RangePicker } = DatePicker;
 const { Option } = Select;
@@ -10,24 +11,20 @@ interface Filters {
     date_start: string | undefined;
     date_end: string | undefined;
     order: string | undefined;
-    tags: string[];
+    tags: Tag[];
     title: string | undefined;
     city: string | undefined;
-  }
+}
 
 interface CustomFiltersProps {
     filters: Filters;
     setFilters: (filters: Filters) => void;
-    filterInputs: ReactElement[];
 }
 
 const CustomFilter: React.FC<CustomFiltersProps> = ({
     filters,
     setFilters,
-    filterInputs,
 }) => {
-    const [tags, setTags] = useState<string[]>(filters.tags);
-
     const handleDateChange = (dates: [dayjs.Dayjs | null, dayjs.Dayjs | null] | null) => {
         setFilters({
             ...filters,
@@ -43,19 +40,15 @@ const CustomFilter: React.FC<CustomFiltersProps> = ({
         });
     };
 
-    const handleTagChange = (tag: string) => {
-        const updatedTags = tags.includes(tag)
-            ? tags.filter((t) => t !== tag)
-            : [...tags, tag];
-        setTags(updatedTags);
+    const handleTagChange = (tags: Tag[]) => {
         setFilters({
             ...filters,
-            tags: updatedTags,
+            tags: tags,
         });
     };
 
     return (
-        <Space style={{backgroundColor:'#FFF9D0', padding:'1em', marginTop:'1em'}}>
+        <Space style={{ backgroundColor: '#FFF9D0', padding: '1em', marginTop: '1em', width: '100%' }}>
             <RangePicker
                 showTime
                 value={[
@@ -72,26 +65,11 @@ const CustomFilter: React.FC<CustomFiltersProps> = ({
                 <Option value="newest">Newest</Option>
                 <Option value="oldest">Oldest</Option>
             </Select>
-            {filterInputs.map((input, index) => (
-                <div key={index}>{input}</div>
-            ))}
-            <div>
-                {tags.map((tag) => (
-                    <Tag
-                        key={tag}
-                        closable
-                        onClose={() => handleTagChange(tag)}
-                        style={{ marginRight: 8 }}
-                    >
-                        {tag}
-                    </Tag>
-                ))}
-                <Input
-                    placeholder="Add tag"
-                    onPressEnter={(e) => handleTagChange((e.target as HTMLInputElement).value)}
-                    style={{ width: 100 }}
-                />
-            </div>
+
+            <TagSelector
+                selectedTags={filters.tags}
+                onTagChange={handleTagChange}
+            />
         </Space>
     );
 };

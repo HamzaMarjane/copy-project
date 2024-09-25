@@ -1,14 +1,14 @@
 "use client";
 import { Col, Layout, Row, Typography } from "antd";
 import { CSSProperties, ReactElement } from "react";
-import { Community, Event } from "../../utils/types";
+import { Community, EventExtra } from "../../utils/types";
 
 const { Content } = Layout;
 const { Title } = Typography;
 
 interface PreviewListProps {
   Card: React.ElementType; // Use ElementType for components
-  data: Event[] | Community[]; // Define the type of data more specifically if possible
+  data: EventExtra[] | Community[]; // Define the type of data more specifically if possible
   title: string;
   Button: ReactElement;
   style?:CSSProperties

@@ -1,82 +1,73 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Button, Input, Form, Upload, Image, DatePicker, Select } from "antd";
+import { Button, Input, Form, DatePicker, Select, InputNumber } from "antd";
 import { Controller } from "react-hook-form";
-import { userFormEvent } from "@ntla9aw/forms/src/event";
 import CustomButton from "../atoms/Button";
 import { Typography } from "antd";
 import { trpcClient } from "@ntla9aw/trpc-client/src/client";
 import { useSession } from "next-auth/react";
-import { PlusOutlined } from "@ant-design/icons";
-import type { UploadFile, UploadProps } from "antd";
 import dayjs from "dayjs";
+import ImageUpload from "../atoms/ImageUpload";
+import TagSelector from "../atoms/TagSelector";
+import { City } from "../../utils/types";
+import { userFormEvent } from "@ntla9aw/forms/src/event";
 
 const { Title } = Typography;
 
-type FileType = Parameters<NonNullable<UploadProps["beforeUpload"]>>[0];
-
-const getBase64 = (file: FileType): Promise<string> =>
-  new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.readAsDataURL(file);
-    reader.onload = () => resolve(reader.result as string);
-    reader.onerror = (error) => reject(error);
-  });
-
-const EventForm = ({ title }: { title: string }) => {
+const EventForm = ({
+  title,
+  event_id,
+}: {
+  title: string;
+  event_id?: string;
+}) => {
   const {
     control,
     handleSubmit,
+    reset,
+    watch,
     formState: { errors },
-  } = userFormEvent();
-  const [cities, setCities] = useState<{ name: string; id: string; longitude: number | null; latitude: number | null; }[]>([]);
-  const { data: userData, status } = useSession();
-  const { mutateAsync } = trpcClient.event.create.useMutation();
-  const { mutateAsync: fetchCommunity } = trpcClient.community.owner.useMutation();
+  } = userFormEvent()
+
+  const [cities, setCities] = useState<City[]>([]);
+  const { data: userData } = useSession();
+  const { mutateAsync: createEvent } = trpcClient.event.create.useMutation();
   const { data: citiesData } = trpcClient.navigation.cities.useQuery();
-  const [communityId, setCommunityId] = useState<string | null>(null);
-  const [previewImage, setPreviewImage] = useState("");
-  const [previewOpen, setPreviewOpen] = useState(false);
+  const { data: eventData, isLoading: isEventLoading } = trpcClient.event.event.useQuery({ event_id });
+  const [communityId, setCommunityId] = useState<string | undefined>();
   const [file, setFile] = useState<File | null>(null);
+
+  const eventType = watch('type');
 
   useEffect(() => {
     if (citiesData) {
-      setCities(citiesData); // Assuming citiesData is an array of city objects
+      setCities(citiesData);
     }
   }, [citiesData]);
-  useEffect(() => { 
+
+  useEffect(() => {
     const getCommunity = async () => {
       if (userData?.user?.uid) {
         try {
-          const community = await fetchCommunity({ uid: userData.user.uid });
-          setCommunityId(community.community_id);
+          const {data:community} = await trpcClient.community.owner.useQuery();
+
+          setCommunityId(community?.community_id);
         } catch (error) {
           console.error("Error fetching community:", error);
         }
       }
     };
-  
- 
-  
+
     getCommunity();
-  }, [userData, fetchCommunity]);
+  }, [userData]);
 
-  if (status === "loading") {
-    return <div>Loading...</div>;
-  }
-
-  if (!userData) {
-    return <div>You need to be authenticated to view this page.</div>;
-  }
-
-  const handlePreview = async (file: UploadFile) => {
-    if (!file.url && !file.preview) {
-      file.preview = await getBase64(file.originFileObj as FileType);
+  useEffect(() => {
+    if (eventData && !isEventLoading) {
+      reset(eventData);
     }
-    setPreviewImage(file.url || (file.preview as string));
-    setPreviewOpen(true);
-  };
+  }, [eventData, isEventLoading, reset]);
+
 
   return (
     <>
@@ -93,7 +84,7 @@ const EventForm = ({ title }: { title: string }) => {
               const formData = new FormData();
               formData.append("file", file);
               formData.append("upload_preset", "ml_default");
-
+      
               const uploadResponse = await fetch(
                 "https://api.cloudinary.com/v1_1/dc0jqirfl/image/upload",
                 {
@@ -101,55 +92,46 @@ const EventForm = ({ title }: { title: string }) => {
                   body: formData,
                 }
               );
-
+      
               const uploadData = await uploadResponse.json();
               data.image = uploadData.secure_url;
             }
-
-            data.uid = userData?.user?.uid;
-            data.community_id = communityId || undefined;
-
-            const response = await mutateAsync(data); // Pass all data including image
-
+      
+            data.uid = userData?.user?.uid ?? undefined;
+            data.community_id = communityId ?? undefined;
+      
+            if (event_id) {
+              data.event_id = event_id;
+            }
+            const response = await createEvent(data);
             console.log("Event created:", response);
           } catch (error) {
-            console.error("Event creation error:", error);
+            console.error("Event operation error:", error);
           }
         })}
         autoComplete="off"
       >
-        {/* Title Field */}
-        <Form.Item
-          label="Title"
-          validateStatus={errors.title ? "error" : ""}
-          help={errors.title?.message}
-        >
+        <Form.Item label="Title" validateStatus={errors.title ? "error" : ""}>
           <Controller
             name="title"
             control={control}
             render={({ field }) => <Input {...field} placeholder="Title" />}
           />
+          {errors.title && <p>{errors.title.message}</p>}
         </Form.Item>
 
-        {/* Description Field */}
-        <Form.Item
-          label="Description"
-          validateStatus={errors.description ? "error" : ""}
-          help={errors.description?.message}
-        >
+        <Form.Item label="Description" validateStatus={errors.description ? "error" : ""}>
           <Controller
             name="description"
             control={control}
-            render={({ field }) => <Input.TextArea {...field} placeholder="Description" />}
+            render={({ field }) => (
+              <Input.TextArea {...field} placeholder="Description" value={field.value || ""} />
+            )}
           />
+          {errors.description && <p>{errors.description.message}</p>}
         </Form.Item>
 
-        {/* Date Field */}
-        <Form.Item
-          label="Date"
-          validateStatus={errors.date ? "error" : ""}
-          help={errors.date?.message}
-        >
+        <Form.Item label="Date" validateStatus={errors.date ? "error" : ""}>
           <Controller
             name="date"
             control={control}
@@ -157,72 +139,130 @@ const EventForm = ({ title }: { title: string }) => {
               <DatePicker
                 showTime
                 onChange={(date) => {
-                  if (date) {
-                    field.onChange(dayjs(date).toISOString());
-                  } else {
-                    field.onChange(null);
-                  }
+                  field.onChange(date ? date.toISOString() : null);
                 }}
                 value={field.value ? dayjs(field.value) : null}
               />
             )}
           />
+          {errors.date && <p>{errors.date.message}</p>}
         </Form.Item>
 
-        {/* Location Field */}
-        <Form.Item
-  label="Location"
-  validateStatus={errors.city_id ? "error" : ""}
-  help={errors.city_id?.message}
->
-  <Controller
-    name="city_id"
-    control={control}
-    render={({ field }) => (
-      <Select
-        {...field}
-        options={cities.map((city) => ({
-          value: city.id,
-          label: city.name,
-        }))}
-      />
-    )}
-  />
-</Form.Item>
+        <Form.Item label="Location" validateStatus={errors.city_id ? "error" : ""}>
+          <Controller
+            name="city_id"
+            control={control}
+            render={({ field }) => (
+              <Select
+                {...field}
+                options={cities.map((city) => ({
+                  value: city.id,
+                  label: city.name,
+                }))}
+              />
+            )}
+          />
+          {errors.city_id && <p>{errors.city_id.message}</p>}
+        </Form.Item>
 
-        {/* File Upload Field */}
-        <Form.Item valuePropName="fileList">
-          <Upload
-            beforeUpload={(file) => {
-              setFile(file);
-              return false;
-            }}
-            listType="picture-card"
-            showUploadList={false}
-            onPreview={handlePreview}
-          >
-            <Button style={{ border: 0, background: "none" }} icon={<PlusOutlined />}>
-              Upload Image
-            </Button>
-          </Upload>
-          {previewImage && (
-            <Image
-              wrapperStyle={{ display: "none" }}
-              preview={{
-                visible: previewOpen,
-                onVisibleChange: (visible) => setPreviewOpen(visible),
-                afterOpenChange: (visible) => !visible && setPreviewImage(""),
-              }}
-              src={previewImage}
+        <Form.Item label="Address" validateStatus={errors.address ? "error" : ""}>
+          <Controller
+            name="address"
+            control={control}
+            render={({ field }) => <Input {...field} placeholder="Address" value={field.value || ""} />}
+          />
+          {errors.address && <p>{errors.address.message}</p>}
+        </Form.Item>
+
+        <Form.Item label="Longitude" validateStatus={errors.longitude ? "error" : ""}>
+          <Controller
+            name="longitude"
+            control={control}
+            render={({ field }) => <InputNumber {...field} />}
+          />
+          {errors.longitude && <p>{errors.longitude.message}</p>}
+        </Form.Item>
+
+        <Form.Item label="Latitude" validateStatus={errors.latitude ? "error" : ""}>
+          <Controller
+            name="latitude"
+            control={control}
+            render={({ field }) => <InputNumber {...field} />}
+          />
+          {errors.latitude && <p>{errors.latitude.message}</p>}
+        </Form.Item>
+
+        <Form.Item label="Event Type" validateStatus={errors.type ? "error" : ""}>
+          <Controller
+            name="type"
+            control={control}
+            render={({ field }) => (
+              <Select {...field}>
+                <Select.Option value="FREE">Free</Select.Option>
+                <Select.Option value="PAID">Paid</Select.Option>
+              </Select>
+            )}
+          />
+          {errors.type && <p>{errors.type.message}</p>}
+        </Form.Item>
+
+        <Form.Item label="Ticket Amount" validateStatus={errors.ticketAmount ? "error" : ""}>
+          <Controller
+            name="ticketAmount"
+            control={control}
+            render={({ field }) => <InputNumber {...field} />}
+          />
+          {errors.ticketAmount && <p>{errors.ticketAmount.message}</p>}
+        </Form.Item>
+
+        {eventType === 'PAID' && (
+          <Form.Item label="Ticket Price" validateStatus={errors.TicketPrice ? "error" : ""}>
+            <Controller
+              name="TicketPrice"
+              control={control}
+              render={({ field }) => <InputNumber {...field} />}
             />
-          )}
+            {errors.TicketPrice && <p>{errors.TicketPrice.message}</p>}
+          </Form.Item>
+        )}
+
+        <Form.Item label="Tags" validateStatus={errors.tags ? "error" : ""}>
+          <Controller
+            name="tags"
+            control={control}
+            render={({ field }) => (
+              <TagSelector
+                selectedTags={field.value || []}
+                onTagChange={(tags) => field.onChange(tags)}
+              />
+            )}
+          />
+          {errors.tags && <p>{errors.tags.message}</p>}
         </Form.Item>
 
-        {/* Submit Button */}
+        <Form.Item label="Image" validateStatus={errors.image ? "error" : ""}>
+          <Controller
+            name="image"
+            control={control}
+            render={({ field }) => (
+              <ImageUpload
+                onChange={(file) => {
+                  setFile(file);
+                  field.onChange(file);
+                }}
+              />
+            )}
+          />
+        </Form.Item>
+
         <Form.Item>
-          <CustomButton style={{ marginRight: 7 }} label="Cancel" onClick={() => {}} />
+          <CustomButton
+            style={{ marginRight: 7 }}
+            label="Cancel"
+            onClick={() => {}}
+          />
           <Button type="primary" htmlType="submit">
-            Submit
+            {event_id ? "Update" : "Submit"}
           </Button>
         </Form.Item>
       </Form>

@@ -1,12 +1,12 @@
 import React from "react";
 import { Avatar, Card, Image, Tag } from "antd";
-import { Event } from "../../utils/types"; // Ensure this includes the necessary properties
+import { EventExtra } from "../../utils/types"; // Ensure this includes the necessary properties
 import CustomButton from "../atoms/Button";
 
 
 const { Meta } = Card;
 
-const EventCard: React.FC<Event> = ({
+const EventCard: React.FC<EventExtra> = ({
   title,
   image,
   tags,

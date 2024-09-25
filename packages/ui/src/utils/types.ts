@@ -11,8 +11,8 @@ export enum AuthProviderType {
     uid: string;
     createdAt: string;
     updatedAt: string;
-    name?: string | null;
-    image?: string | null;
+    image: string | null;
+    name: string | null;  // Keep this as string | null    image?: string;
     stripe_customer_id?: string | null;
     Credentials?: Credentials | null;
     AuthProvider?: AuthProvider | null;
@@ -75,29 +75,61 @@ export enum AuthProviderType {
     events?: Event[] | null;
     tags?: Tag[] | null;
   }
-  
   export interface Event {
     event_id: string;
     title: string;
-    description?: string | null;
-    date: string;
+    description: string | null;
+    date: Date | string;
     city_id: string;
-    uid?: string | null;
-    community_id?: string | null;
-    tags: Tag[];
-    user?: User | null;
-    community?: Community | null;
-    tickets?: Ticket[] | null;
-    city: City;
-    address?: string | null;
-    longitude?: number | null;
-    latitude?: number | null;
+    uid: string | null;
+    community_id: string | null;
+    address: string | null;
+    longitude: number | null;
+    latitude: number | null;
     ticketAmount: number;
     TicketPrice: number;
     type: 'FREE' | 'PAID';
+    image: string | null;
+  }
+  export interface EventExtra {
+    event_id? : string;
+    title?: string;
+    description?: string | null;
+    date?: string;
+    city_id?: string;
+    uid?: string | null;
+    community_id?: string | null;
+    tags?: Tag[];
+    user?: User | null;
+    community?: Community | null;
+    tickets?: Ticket[] | null;
+    city?: City;
+    address?: string | null;
+    longitude?: number | null;
+    latitude?: number | null;
+    ticketAmount?: number;
+    TicketPrice?: number;
+    type?: 'FREE' | 'PAID';
     image?: string | null;
   }
-  
+
+  export interface TransformedEvent {
+    event_id: string;
+    title: string;
+    description: string | null;
+    date: string;
+    city_id: string;
+    uid: string | null;
+    community_id: string | null;
+    address: string | null;
+    longitude: number | null;
+    latitude: number | null;
+    ticketAmount: number;
+    TicketPrice: number;
+    type: 'FREE' | 'PAID';
+    image: string | null;
+    city: City;
+  }
   export interface Ticket {
     ticket_id: string;
     event_id: string;
@@ -133,3 +165,5 @@ export enum AuthProviderType {
     latitude?: number | null;
     events?: Event[] | null;
   }
+
+  export type Role = 'admin' | 'member' | 'individual' | 'organization';

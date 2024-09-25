@@ -16,6 +16,23 @@
     },
     "tsc": {
       "dependsOn": ["^tsc"]
+    },
+    "test": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.tsx", "src/**/*.ts", "test/**/*.ts", "test/**/*.tsx"]
+    },
+    "test:api": {
+      "cache": true,
+      "outputs": ["coverage/**"],
+      "inputs": ["src/**/*.ts", "test/**/*.ts"]
+    },
+    "docker:build": {
+      "cache": false
+    },
+    "docker:push": {
+      "cache": false,
+      "dependsOn": ["docker:build"]
     }
   }
 }

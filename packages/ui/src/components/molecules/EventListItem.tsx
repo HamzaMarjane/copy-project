@@ -1,12 +1,12 @@
 import React, { MouseEvent } from "react";
 import { Avatar, Card, Image, Tag, Typography } from "antd";
-import { Event } from "../../utils/types";
+import { EventExtra } from "../../utils/types";
 import CustomButton from "../atoms/Button";
 import { useRouter } from "next/navigation";
 
 const { Meta } = Card;
 
-interface EventListItemProps extends Event {
+interface EventListItemProps extends EventExtra {
   isSelected?: boolean;
   onClick: () => void;
 }
@@ -29,7 +29,7 @@ const EventListItem: React.FC<EventListItemProps> = ({
 
   const handleBookClick = (e: MouseEvent) => {
     e.stopPropagation();
-    router.push(`/event/${event_id}`);
+    router.push(`/explore/event/${event_id}`);
   };
 
   return (
@@ -63,7 +63,7 @@ const EventListItem: React.FC<EventListItemProps> = ({
         />
         <div style={{ marginTop: 10 }}>
           <div>
-            {tags.map((tag, index) => (
+            {tags && tags.map((tag, index) => (
               <Tag key={index} color="blue">
                 {tag.name}
               </Tag>
@@ -73,7 +73,7 @@ const EventListItem: React.FC<EventListItemProps> = ({
             <strong>Date:</strong> {date}
           </p>
           <p>
-            <strong>Location:</strong> {address}, {city.name}
+            <strong>Location:</strong> {address}, {city && city.name}
           </p>
         </div>
       </div>
@@ -95,7 +95,7 @@ const EventListItem: React.FC<EventListItemProps> = ({
           <Typography.Text strong>Tickets:</Typography.Text> {ticketAmount}
         </div>
         <div>
-          <Typography.Text strong>Price:</Typography.Text> ${TicketPrice}
+          <Typography.Text strong>Price:</Typography.Text> {TicketPrice && TicketPrice > 0 ? `${TicketPrice}` : 'Free'}
         </div>
         <div>
           <CustomButton label="Book" onClick={handleBookClick} />

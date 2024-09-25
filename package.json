@@ -6,20 +6,25 @@
     "dev": "turbo dev",
     "lint": "turbo lint",
     "tsc": "turbo tsc",
+    "test:api": "turbo run test:api --filter=@ntla9aw/api",
     "format": "prettier \"{apps,libs}/**/*.{ts,tsx,js,json}\" --ignore-path .gitignore",
     "format:check": "pnpm format --check",
     "format:write": "pnpm format --write",
-    "validate": "pnpm format:write && pnpm tsc && pnpm lint && pnpm build",
-    "prepare": "husky install"
+    "validate": "pnpm format:write && pnpm tsc && pnpm lint && pnpm test && pnpm build",
+    "prepare": "husky install",
+    "docker:build": "sudo docker build -t ntla9aw .",
+    "docker:push": "turbo run docker:push"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.0",
+    "@types/node": "^22.7.4",
     "husky": "^8.0.0",
     "lint-staged": "^15.2.10",
     "prettier": "^3.2.5",
     "turbo": "^2.1.1",
     "typescript": "^5.4.5"
   },
-  "packageManager": "pnpm@8.15.6",
+  "packageManager": "pnpm@9.11.0",
   "engines": {
     "node": ">=18"
   }

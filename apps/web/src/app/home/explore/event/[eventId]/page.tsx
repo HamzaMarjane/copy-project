@@ -8,14 +8,14 @@ import CommunityCard from "@ntla9aw/ui/src/components/molecules/CommunityCard";
 import Button from "@ntla9aw/ui/src/components/atoms/Button";
 import TicketCard from "@ntla9aw/ui/src/components/molecules/TicketCard";
 import { trpcStatic } from "@ntla9aw/trpc-client/src/static";
-import { Community, Event } from "@ntla9aw/ui/src/utils/types";
+import { Community, EventExtra } from "@ntla9aw/ui/src/utils/types";
 import { useParams, useRouter } from "next/navigation";
 import { trpcClient } from "@ntla9aw/trpc-client/src/client";
 import { useSession } from "next-auth/react";
 export default function EventPage() {
   const { eventId } = useParams(); // eventId can be string or string[]
-  const [eventData, setEventData] = useState<Event>();
-  const [eventsData, setEventsData] = useState<Event[]>([]);
+  const [eventData, setEventData] = useState<EventExtra>();
+  const [eventsData, setEventsData] = useState<EventExtra[]>([]);
   const [communitiesData, setCommunitiesData] = useState<Community[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -50,7 +50,7 @@ export default function EventPage() {
       try {
         const data = await trpcStatic.event.events.query({});
         if (data) {
-          setEventsData(data);
+          setEventsData(data.events);
         }
       } catch (err) {
         setError("Error Fetching Events");

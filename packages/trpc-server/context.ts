@@ -9,5 +9,6 @@ export const createTRPCContext = ({
     req,
     res,
     token,
+    uid: undefined as string | undefined,
   };
 };

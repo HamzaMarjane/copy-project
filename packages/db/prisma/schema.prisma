@@ -109,7 +109,7 @@ model Event {
     TicketPrice  Float      @default(0)
     type         EventType
     image        String? // New attribute for image
-                                                        
+    ticketSold Int                        
     @@map("events") // Rename the table to events
 }
 
@@ -124,7 +124,6 @@ model Ticket {
     uid           String
     purchase_date DateTime @default(now())
     status        String
-
     event Event @relation(fields: [event_id], references: [event_id])
     user  User  @relation(fields: [uid], references: [uid])
 

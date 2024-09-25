@@ -3,9 +3,11 @@
 import { trpcClient } from "@ntla9aw/trpc-client/src/client";
 import { useSession } from "next-auth/react";
 import SubscriptionForm from "@ntla9aw/ui/src/components/molecules/SubscriptionForm";
+import { useRouter } from "next/navigation";
 
 export default function Register() {
   const { data: userData, status } = useSession();
+  const router = useRouter();
   const { mutateAsync } = trpcClient.upgrade.create.useMutation();
 
   const subscriptions = [
@@ -33,12 +35,14 @@ export default function Register() {
     product: "member" | "individual" | "organization",
   ) => {
     if (!userData?.user?.uid) return; // Ensure uid is available
+    if (product === "member") {
+      router.push("/auth/preferences");
+    }
     try {
       const response = await mutateAsync({ product, uid: userData.user.uid });
       if (response?.sessionId) {
         // Only redirect if sessionId is valid
         window.location.href = response.sessionId;
-        alert(`Successfully subscribed to ${product}`);
       } else {
         throw new Error("No sessionId returned");
       }

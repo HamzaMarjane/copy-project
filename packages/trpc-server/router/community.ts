@@ -2,7 +2,6 @@ import { TRPCError } from "@trpc/server";
 import {
   formSchemaCommunity,
   formSchemaCommunityCreate,
-  formSchemaUser,
 } from "@ntla9aw/forms/src/schemas";
 import { privateProcedure, publicProcedure, router } from "../trpc";
 import { prisma } from "@ntla9aw/db";
@@ -18,8 +17,8 @@ export const communityRoutes = router({
       return prisma.community.findUnique({ where: { community_id } });
     }),
   owner: privateProcedure('individual',"organization")
-    .input(formSchemaUser)
-    .mutation(async ({  input: { uid } }) => {
+    .query(async ({  ctx}) => {
+      const uid = ctx.uid
       const community = await prisma.community.findUnique({ where: { uid } });
       if (!community) {
         throw new TRPCError({

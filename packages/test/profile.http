@@ -1,7 +1,0 @@
-POST http://localhost:8080/trpc/auth.createProfile HTTP/1.1
-content-type: application/json
-
-{
-    "uid":"316a97fd-1057-4d15-8394-b6577fd756b3",
-    "name": "sample",
-}

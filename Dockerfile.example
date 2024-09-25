@@ -1,0 +1,52 @@
+FROM node:20-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
+RUN apt-get update -y && apt-get install -y openssl
+
+RUN corepack enable
+
+# Set PostgreSQL and PGAdmin environment variables
+ENV POSTGRES_USER=postres
+ENV POSTGRES_DB=postres
+ENV POSTGRES_PASSWORD=password
+ENV PGADMIN_EMAIL=admin@email.com
+ENV PGADMIN_PASSWORD=password
+ENV PG_PORT=1000
+ENV PGADMIN_PORT=1100
+ENV DATABASE_URL="postgresql://postres:password@localhost:1000/postres?schema=public"
+
+
+FROM base AS build
+COPY . /usr/src/app
+WORKDIR /usr/src/app
+RUN pnpm install 
+RUN pnpm add -g prisma
+RUN pnpm run -r build
+RUN pnpm deploy --filter=@ntla9aw/web --prod /prod/web
+RUN pnpm deploy --filter=@ntla9aw/api --prod /prod/api
+
+FROM base AS web
+COPY --from=build /prod/web /prod/web
+WORKDIR /prod/web
+
+ENV NEXTAUTH_SECRET=jwtSecret
+ENV NEXT_PUBLIC_API_URL=http://localhost:8080
+ENV NEXT_PUBLIC_APP_URL=http://localhost:3000
+
+EXPOSE 3000
+CMD [ "pnpm", "start" ]
+
+FROM base AS api
+COPY --from=build /prod/api /prod/api
+WORKDIR /prod/api
+
+ENV NEXTAUTH_SECRET=jwtSecret
+ENV GOOGLE_CLIENT_ID=
+ENV GOOGLE_CLIENT_SECRET=
+ENV STRIPE_SECRET_KEY=
+ENV STRIPE_MEMBER_PRICE_ID=
+ENV STRIPE_INDIVIDUAL_PRICE_ID=
+ENV STRIPE_ORGANIZATION_PRICE_ID=
+
+EXPOSE 8000
+CMD [ "pnpm", "start" ]
