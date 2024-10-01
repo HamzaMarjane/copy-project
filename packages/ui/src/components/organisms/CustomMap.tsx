@@ -1,4 +1,5 @@
-import { Marker, Popup, TileLayer } from "react-leaflet";
+import React, { useEffect } from "react";
+import { Marker, Popup, TileLayer, useMap } from "react-leaflet";
 import { MapContainer } from "react-leaflet/MapContainer";
 import "leaflet/dist/leaflet.css";
 import "leaflet-defaulticon-compatibility";
@@ -9,6 +10,16 @@ interface CustomMapProps {
   position: [number | null | undefined, number | null | undefined]; // Tuple for latitude and longitude
   zoom: number;
 }
+
+const MapUpdater: React.FC<{ position: [number, number] }> = ({ position }) => {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(position, map.getZoom());
+  }, [map, position]);
+
+  return null;
+};
 
 const CustomMap: React.FC<CustomMapProps> = ({ position, zoom }) => {
   // Default position in case latitude or longitude are null/undefined
@@ -29,6 +40,7 @@ const CustomMap: React.FC<CustomMapProps> = ({ position, zoom }) => {
       <Marker position={validPosition}>
         <Popup>A pretty CSS3 popup. Easily customizable.</Popup>
       </Marker>
+      <MapUpdater position={validPosition} />
     </MapContainer>
   );
 };

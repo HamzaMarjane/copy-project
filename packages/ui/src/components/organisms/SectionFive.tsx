@@ -1,76 +1,96 @@
 import React from "react";
-import { Col, List, Row, Space, Typography } from "antd";
-import CustomButton from "../atoms/Button"; // Adjust the import path as necessary
+import { Col, Row, Typography, Card, List, Button } from "antd";
+import { CheckOutlined } from "@ant-design/icons";
 
 const { Title } = Typography;
 
 interface SubscriptionTerm {
-  id: number; // Assuming each term has a unique ID
-  description: string; // Description of the term
+  id: number;
+  description: string;
 }
 
 interface Subscription {
-  name: string; // Name of the subscription plan
-  terms: SubscriptionTerm[]; // Array of terms for this subscription
+  name: string;
+  terms: SubscriptionTerm[];
+  price: string;
 }
 
 interface SectionFiveProps {
-  subscriptions: Subscription[]; // Array of subscriptions
+  subscriptions: Subscription[];
 }
 
 const SectionFive: React.FC<SectionFiveProps> = ({ subscriptions }) => {
   return (
-    <>
-      <Space direction="vertical">
-        <Title level={2}>
-          Subscription Plan
-          <div
-            style={{
-              borderRadius: 10,
-              height: 15, // Adjust height for visibility
-              width: 230,
-              background: "#FFF9D0",
-            }}
-          />
-        </Title>
-      </Space>
-      <Space direction="vertical">
-        <Row gutter={[32, 32]} justify={"space-between"} style={{ margin: 50 }}>
-          {subscriptions.map((subscription, index) => (
-            <Col
-              span={6}
-              key={index}
+    <div style={{ padding: "40px 0", background: "#f0f2f5" }}>
+      <Title level={2} style={{ textAlign: "center", marginBottom: 40 }}>
+        Subscription Plans
+        <div
+          style={{
+            margin: "10px auto",
+            width: 100,
+            height: 4,
+            background: "#FFF9D0",
+            borderRadius: 2,
+          }}
+        />
+      </Title>
+      <Row gutter={[24, 24]} justify="center">
+        {subscriptions.map((subscription, index) => (
+          <Col xs={24} sm={12} md={8} key={index}>
+            <Card
+              hoverable
               style={{
-                backgroundColor: "#5AB2FF",
-                borderRadius: 10,
-                minHeight: 250,
-                padding: 20,
-                cursor: "pointer",
-                boxShadow: "0px 0px 10px rgba(0, 0, 0, 0.2)",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                background: "#1890ff",
+                borderRadius: 8,
+              }}
+              bodyStyle={{
+                flex: 1,
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
               }}
             >
-              <h3>{subscription.name}</h3> {/* Display the subscription name */}
-              <List
-                dataSource={subscription.terms}
-                renderItem={(item) => (
-                  <List.Item key={item.id}>{item.description}</List.Item>
-                )}
-              />
-              <CustomButton
-                style={{ marginTop: "20px", backgroundColor: "#5AB2FF" }}
-                label="Subscribe"
-                onClick={() =>
-                  console.log(`Subscribed to ${subscription.name}`)
-                }
-              />
-            </Col>
-          ))}
-        </Row>
-      </Space>
-    </>
+              <div>
+                <Title level={3} style={{ color: "white", textAlign: "center" }}>
+                  {subscription.name}
+                </Title>
+                <Title level={2} style={{ color: "white", textAlign: "center", marginTop: 0 }}>
+                  {subscription.price}
+                </Title>
+                <List
+                  dataSource={subscription.terms}
+                  renderItem={(item) => (
+                    <List.Item
+                      key={item.id}
+                      style={{ border: "none", padding: "8px 0", color: "white" }}
+                    >
+                      <CheckOutlined style={{ marginRight: 8, color: "#52c41a" }} />
+                      {item.description}
+                    </List.Item>
+                  )}
+                />
+              </div>
+              <Button
+                type="primary"
+                size="large"
+                style={{
+                  marginTop: 20,
+                  background: "white",
+                  borderColor: "white",
+                  color: "#1890ff",
+                }}
+                onClick={() => console.log(`Subscribed to ${subscription.name}`)}
+              >
+                Subscribe Now
+              </Button>
+            </Card>
+          </Col>
+        ))}
+      </Row>
+    </div>
   );
 };
 

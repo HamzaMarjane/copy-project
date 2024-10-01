@@ -52,30 +52,40 @@ const testimonials = [
     quotation: "A fantastic experience overall!",
   },
 ];
-
 const subscriptions = [
   {
-    name: "Basic Plan",
+    name: "Free",
+    price: "$0/month",
     terms: [
-      { id: 1, description: "Access to basic features" },
-      { id: 2, description: "Limited support" },
+      { id: 1, description: "Book events" },
+      { id: 2, description: "Join communities" },
+      { id: 3, description: "Access to basic features" },
+      { id: 4, description: "Limited event attendance" },
     ],
   },
   {
-    name: "Pro Plan",
+    name: "Individual",
+    price: "$9.99/month",
     terms: [
-      { id: 3, description: "Access to all features" },
-      { id: 4, description: "Priority support" },
+      { id: 1, description: "Create and manage events" },
+      { id: 2, description: "Join unlimited communities" },
+      { id: 3, description: "Priority event booking" },
+      { id: 4, description: "Access to premium features" },
     ],
   },
   {
-    name: "Enterprise Plan",
+    name: "Organization",
+    price: "$49.99/month",
     terms: [
-      { id: 5, description: "Custom solutions" },
-      { id: 6, description: "Dedicated account manager" },
+      { id: 1, description: "Create and manage multiple events" },
+      { id: 2, description: "Create and manage communities" },
+      { id: 3, description: "Advanced analytics and reporting" },
+      { id: 4, description: "Dedicated support" },
     ],
   },
 ];
+
+<SectionFive subscriptions={subscriptions} />
 
 export default function Home() {
   return (
